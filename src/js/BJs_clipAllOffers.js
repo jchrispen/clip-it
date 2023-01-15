@@ -6,8 +6,8 @@
  * @return {Promise<T>}
  */
 async function clipAllOffers() {
-    const membershipNumber = localStorage.getItem('x_MembershipNumber')
-    const zipcode = JSON.parse(localStorage.getItem('clubDetailsForClubId')).postalCode
+    const membershipNumber = localStorage.getItem('x_MembershipNumber');
+    const zipcode = JSON.parse(localStorage.getItem('clubDetailsForClubId')).postalCode;
     await fetch('https://api.bjs.com/digital/live/api/v1.0/member/available/offers', {
         method: 'post',
         credentials: 'include',
@@ -34,5 +34,5 @@ async function clipAllOffers() {
                     }
                 )
             })
-        })
-}
+        });
+};
