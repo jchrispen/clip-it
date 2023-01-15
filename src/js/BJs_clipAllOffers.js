@@ -7,7 +7,20 @@
  */
 async function clipAllOffers() {
     const membershipNumber = localStorage.getItem('x_MembershipNumber');
-    const zipcode = JSON.parse(localStorage.getItem('clubDetailsForClubId')).postalCode;
+    // if membership is null or undefined exit.
+    if (membershipNumber === null || membershipNumber === undefined) {
+        console.log("FINDME membership: Need to be logged in to clip coupons.");
+        alert("You must be logged in.");
+        return;
+    }
+    let clubDetails = localStorage.getItem('clubDetailsForClubId');
+    if (clubDetails === null || clubDetails === undefined) {
+        console.log("FINDME club: Need location selected to be able to pull offers.");
+        alert("You must select a store.");
+        return;
+    }
+    console.log("FINDME: clipping coupons!");
+    const zipcode = JSON.parse(clubDetails).postalCode;
     await fetch('https://api.bjs.com/digital/live/api/v1.0/member/available/offers', {
         method: 'post',
         credentials: 'include',
@@ -35,4 +48,7 @@ async function clipAllOffers() {
                 )
             })
         });
-};
+    alert("Coupons clipped");
+}
+
+clipAllOffers();

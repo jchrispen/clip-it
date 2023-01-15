@@ -15,15 +15,6 @@
     "scripts": ["js/background.js"]
   },
 
-  "content_scripts": [
-    {
-      "matches": [
-        "https://www.bjs.com/*"
-      ],
-      "js": ["js/content.js"]
-    }
-  ],
-
   "browser_action": {
     "default_title": "Clip it!",
     "default_icon": "icons/clip-it_dark.png",
