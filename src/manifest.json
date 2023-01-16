@@ -5,6 +5,13 @@
   "description": "An extension to clip all the coupons with one click",
   "homepage_url": "https://github.com/jchrispen/bjs-clip-it",
 
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{e175a61e-0853-4ef3-8ae5-eed6bd4b8c47}",
+      "update_url": "https://github.com/jchrispen/bjs-clip-it/releases"
+    }
+  },
+
   "permissions": [
     "<all_urls>",
     "tabs",
