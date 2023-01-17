@@ -1,14 +1,13 @@
 {
   "manifest_version": 2,
   "name": "BJs Clip-it",
-  "version": "1.2",
+  "version": "1.0",
   "description": "An extension to clip all the coupons with one click",
   "homepage_url": "https://github.com/jchrispen/bjs-clip-it",
 
   "browser_specific_settings": {
     "gecko": {
-      "id": "{e175a61e-0853-4ef3-8ae5-eed6bd4b8c47}",
-      "update_url": "https://github.com/jchrispen/bjs-clip-it/releases"
+      "id": "{e4f681df-7721-4c60-b31a-73e6b489c791}"
     }
   },
 

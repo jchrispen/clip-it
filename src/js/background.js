@@ -32,18 +32,9 @@ function clipit() {
 }
 
 function onExecuted(result) {
-    console.log(`We executed in all subframes`);
+    console.log(`FINDME Success: We executed`);
 }
 
 function onError(error) {
-    console.log(`Error: ${error}`);
-}
-
-function reloadPage() {
-    /**
-     * this reload keeps stopping the clipping.
-     * I think it is because the function has not completed.
-     * This would imply Internet speed impacts this.
-      */
-    browser.tabs.reload();
+    console.log(`FINDME Error: ${error}`);
 }
