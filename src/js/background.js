@@ -1,40 +1,104 @@
-/*
- * Clip all the coupons on your BJs account.
+/**
+ * Clip all available BJ's coupons
+ * - Login to BJ's website
+ * - Click on the Clip-it icon
+ * - Clip coupons
+ * - Based on the work of raxityo/clipAllOffers.js on github
+ *
+ * background script interacts with the user and can send notifications
  */
 
-browser.browserAction.onClicked.addListener((tab) => {
-        var taburl = "https://www.bjs.com";
-        var currenturl = tab.url;
+"use strict";
 
-        var match = currenturl.startsWith(taburl);
-        if (match) {
-            // clip coupons
-            console.log("FINDME: clip it!");
-            clipit();
-            tab.url = taburl + "/myCoupons";
+/** ---------------------------------------------------------------------------
+ * onClicked listener
+ **/
+browser.action.onClicked.addListener(async (tab) => {
+        console.log("Hi, Mom!");
+        var bjs_url = "https://www.bjs.com";
+        var current_url = tab.url;
+        var bjs_match = current_url.startsWith(bjs_url);
 
+        if (bjs_match) {
+            console.log("MembershipNumber: Getting member number");
+            const membershipNumber = await grabItem(tab, "x_MembershipNumber");
+            // if membership is null or undefined exit.
+            if (isInvalid(membershipNumber)) {
+                const message = "Membership: Need to be logged in to clip coupons";
+                console.log(message);
+                showAlert("Error", message);
+                return;
+            }
+            console.log("MembershipNumber: " + membershipNumber);
+
+            console.log("clubDetails: Getting clubDetails");
+            const clubDetails = await grabItem(tab, "clubDetailsForClubId");
+            // if clubDetails is null or undefined exit.
+            if (isInvalid(clubDetails)) {
+                const message = "Club: Need location selected to be able to pull offers";
+                console.log(message);
+                return;
+            }
+
+            console.log("Zipcode: Getting zipcode from clubDetails");
+            let postalCode = null;
+            try {
+                postalCode = JSON.parse(clubDetails)["postalCode"];
+            } catch (error) {
+                const message = "Zipcode: Issue parsing clubDetails";
+                console.log(message);
+                showAlert("Error", message);
+                return;
+            }
+            const zipcode = postalCode;
+            console.log("Zipcode: " + zipcode);
+
+            console.log("Send clip request");
+            await bjs_clipOffers(tab, membershipNumber, zipcode);
         } else {
-            console.log("FINDME: new tab!");
-            // open new tab
+            console.log("new tab!");
             browser.tabs.create({
-                url: taburl
+                url: bjs_url
             });
         }
     }
 )
 
-function clipit() {
-    const executing = browser.tabs.executeScript({
-        file: "js/BJs_clipAllOffers.js",
-        allFrames: false
-    });
-    executing.then(onExecuted, onError);
+/** ---------------------------------------------------------------------------
+ * Common functions
+ **/
+async function grabItem(tab, key) {
+    if (isInvalid(tab) || isInvalid(key)) {
+        const message = "grabItem: tab or key not valid";
+        onError(message);
+        return Promise.reject(message);
+    }
+
+    const emptyString = "";
+    return await browser.tabs.sendMessage(tab.id, { type: Type.getItem, itemKey: key })
+        .then((response) => {
+            let valueString = emptyString;
+            if (response.item) {
+                valueString = response.item;
+            } else {
+                onError("grabItem: did not find [" + key + "]: " + response.reason);
+            }
+            return valueString;
+        })
+        .catch(onError);
 }
 
-function onExecuted(result) {
-    console.log(`FINDME Success: We executed`);
-}
-
-function onError(error) {
-    console.log(`FINDME Error: ${error}`);
+/** ---------------------------------------------------------------------------
+ * BJs.com functions
+ **/
+async function bjs_clipOffers(tab, membershipNumber, zipcode) {
+    await browser.tabs.sendMessage(tab.id, { type: Type.bjs_clipOffers, membershipNumber: membershipNumber, zipcode: zipcode })
+        .then(value => {
+            console.log(value);
+            showAlert("Success", value);
+        })
+        .catch(error => {
+            onError(error.message);
+            showAlert("Fail", error.message);
+        });
 }

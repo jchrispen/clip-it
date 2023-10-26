@@ -1,7 +1,7 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "BJs Clip-it",
-  "version": "1.0",
+  "version": "1.1",
   "description": "An extension to clip all the coupons with one click",
   "homepage_url": "https://github.com/jchrispen/bjs-clip-it",
 
@@ -11,17 +11,38 @@
     }
   },
 
+  "host_permissions": [
+    "https://api.bjs.com/*",
+    "https://www.bjs.com/*",
+    "<all_urls>"
+  ],
+
   "permissions": [
-    "<all_urls>",
-    "tabs",
-    "storage"
+    "webRequest",
+    "cookies",
+    "activeTab",
+    "storage",
+    "notifications"
   ],
 
   "background": {
-    "scripts": ["js/background.js"]
+    "scripts": [
+      "js/background.js",
+      "js/common.js"
+    ]
   },
 
-  "browser_action": {
+  "content_scripts": [
+    {
+      "matches": ["*://*.bjs.com/*"],
+      "js": [
+        "js/content.js",
+        "js/common.js"
+      ]
+    }
+  ],
+
+  "action": {
     "default_title": "Clip it!",
     "default_icon": "icons/clip-it_dark.png",
     "theme_icons": [{
