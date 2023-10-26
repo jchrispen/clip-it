@@ -8,7 +8,6 @@
  */
 const MAX_COUPON_REQUEST = 500;
 
-
 /**
  * Type class is an enum to keep background and
  * content scripts inline with each other.
@@ -43,6 +42,14 @@ function showAlert(title, message) {
         message: message,
         priority: 1
     });
+}
+
+function success(message) {
+    showAlert("Success", message);
+}
+
+function fail(message) {
+    showAlert("Fail", message);
 }
 
 function isInvalid(variable) {

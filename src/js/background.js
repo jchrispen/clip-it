@@ -24,9 +24,9 @@ browser.action.onClicked.addListener(async (tab) => {
             const membershipNumber = await grabItem(tab, "x_MembershipNumber");
             // if membership is null or undefined exit.
             if (isInvalid(membershipNumber)) {
-                const message = "Membership: Need to be logged in to clip coupons";
-                console.log(message);
-                showAlert("Error", message);
+                const message = "Need to be logged in to clip coupons";
+                onError(message);
+                fail(message);
                 return;
             }
             console.log("MembershipNumber: " + membershipNumber);
@@ -35,8 +35,9 @@ browser.action.onClicked.addListener(async (tab) => {
             const clubDetails = await grabItem(tab, "clubDetailsForClubId");
             // if clubDetails is null or undefined exit.
             if (isInvalid(clubDetails)) {
-                const message = "Club: Need location selected to be able to pull offers";
-                console.log(message);
+                const message = "Need location selected to be able to pull offers";
+                onError(message);
+                fail(message);
                 return;
             }
 
@@ -45,9 +46,9 @@ browser.action.onClicked.addListener(async (tab) => {
             try {
                 postalCode = JSON.parse(clubDetails)["postalCode"];
             } catch (error) {
-                const message = "Zipcode: Issue parsing clubDetails";
-                console.log(message);
-                showAlert("Error", message);
+                const message = "Issue parsing clubDetails for zipcode";
+                onError(message);
+                fail(message);
                 return;
             }
             const zipcode = postalCode;
@@ -81,7 +82,7 @@ async function grabItem(tab, key) {
             if (response.item) {
                 valueString = response.item;
             } else {
-                onError("grabItem: did not find [" + key + "]: " + response.reason);
+                onError("did not find [" + key + "]: " + response.reason);
             }
             return valueString;
         })
@@ -95,10 +96,10 @@ async function bjs_clipOffers(tab, membershipNumber, zipcode) {
     await browser.tabs.sendMessage(tab.id, { type: Type.bjs_clipOffers, membershipNumber: membershipNumber, zipcode: zipcode })
         .then(value => {
             console.log(value);
-            showAlert("Success", value);
+            success(value);
         })
         .catch(error => {
             onError(error.message);
-            showAlert("Fail", error.message);
+            fail(error.message);
         });
 }

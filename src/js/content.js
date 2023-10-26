@@ -35,14 +35,14 @@ browser.runtime.onMessage.addListener((request) => {
  * Common functions
  **/
 function getItem(itemKey) {
-    console.log("localStorage: Checking for support");
+    console.log("Checking for localStorage support");
     if (!window.localStorage) {
         throw Error("localStorage not supported");
     }
-    console.log("localStorage: Is supported. Getting [" + itemKey + "]");
+    console.log("localStorage is supported. Getting [" + itemKey + "]");
     const item= window.localStorage.getItem(itemKey);
     if (isInvalid(item)) {
-        throw Error("Item not found");
+        throw Error("Item [" + itemKey + "] not found");
     } else {
         return item;
     }
@@ -71,12 +71,12 @@ async function bjs_clipOffers(membershipNumber, zipcode) {
         .then(response => {
             // check for a failed response
             if (response.status < 200 && response.status > 299) {
-                const message = "Offers: Fetch unsuccessful [" + response.status + "] " + response.statusText;
+                const message = "Offers fetch unsuccessful [" + response.status + "] " + response.statusText;
                 onError(message);
                 return Promise.reject(message);
             }
 
-            const message = "Offers: Fetch status [" + response.status + "]";
+            const message = "Offers fetch status [" + response.status + "]";
             console.log(message);
             return response.json();
         })
@@ -92,7 +92,7 @@ async function bjs_clipOffers(membershipNumber, zipcode) {
             availableOffers.forEach(
                 async ({ offerId, storeId }) => {
                     if (isInvalid(offerId)) {
-                        const message = "availableOffers: offerId is not valid";
+                        const message = "OfferId is not valid";
                         onError(message);
                         return;
                     }
