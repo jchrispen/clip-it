@@ -29,7 +29,7 @@ browser.runtime.onMessage.addListener((request) => {
             console.log("clip it!");
             return bjs_clipOffers(request.membershipNumber, request.zipcode);
         default:
-            return Promise.reject(Error("Site not supported"));
+            return Promise.reject(Error("Request type [" + request.type + "] not supported"));
     }
 });
 
