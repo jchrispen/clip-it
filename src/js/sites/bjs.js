@@ -23,7 +23,7 @@ async function bjs_coupon(tab) {
 }
 
 async function bjs_getMembershipNumber(tab) {
-    console.log("MembershipNumber: Getting member number");
+    console.log("Getting membership number");
     const membershipNumber = await grabItem(tab, "x_MembershipNumber");
     // if membership is null or undefined exit.
     if (isInvalid(membershipNumber)) {
@@ -36,7 +36,7 @@ async function bjs_getMembershipNumber(tab) {
 }
 
 async function bjs_getClubDetails(tab) {
-    console.log("clubDetails: Getting clubDetails");
+    console.log("Getting clubDetails");
     const clubDetails = await grabItem(tab, "clubDetailsForClubId");
 
     // if clubDetails is null or undefined exit.
@@ -70,8 +70,20 @@ async function bjs_clipCoupons(tab, membershipNumber, zipcode) {
 /** ---------------------------------------------------------------------------
  * BJs.com content functions
  **/
+
+async function bjs_getItem(itemKey) {
+    try {
+        const itemValue = getItem(itemKey);
+        console.log(itemKey + ": " + itemValue);
+        return Promise.resolve({ item: itemValue });
+    } catch (error) {
+        onError(error);
+        return Promise.reject(error);
+    }
+}
+
 async function bjs_clipOffers(membershipNumber, zipcode) {
-    console.log("Offers: Fetching available offers from API");
+    console.log("Fetching available offers from API");
     return fetch('https://api.bjs.com/digital/live/api/v1.0/member/available/offers', {
         method: 'post',
         credentials: 'include',

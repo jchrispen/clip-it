@@ -17,14 +17,7 @@ browser.runtime.onMessage.addListener((request) => {
     switch (request.type) {
         case Type.getItem:
             console.log("Getting [" + request.itemKey + "]");
-            try {
-                const itemValue = getItem(request.itemKey);
-                console.log(request.itemKey + ": " + itemValue);
-                return Promise.resolve({ item: itemValue });
-            } catch (error) {
-                onError("onMessage: " + error);
-                return Promise.reject(error);
-            }
+            return bjs_getItem(request.itemKey);
         case Type.bjs_clipOffers:
             console.log("clip it!");
             return bjs_clipOffers(request.membershipNumber, request.zipcode);
