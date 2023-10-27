@@ -45,10 +45,12 @@ function showAlert(title, message) {
 }
 
 function success(message) {
+    console.log("Success: " + message);
     showAlert("Success", message);
 }
 
 function fail(message) {
+    onError("Fail: " + message);
     showAlert("Fail", message);
 }
 

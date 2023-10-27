@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "BJs Clip-it",
+  "name": "Clip-it",
   "version": "1.1",
   "description": "An extension to clip all the coupons with one click",
   "homepage_url": "https://github.com/jchrispen/bjs-clip-it",
@@ -27,8 +27,9 @@
 
   "background": {
     "scripts": [
-      "js/background.js",
-      "js/common.js"
+      "js/sites/bjs.js",
+      "js/common.js",
+      "js/background.js"
     ]
   },
 
@@ -36,8 +37,9 @@
     {
       "matches": ["*://*.bjs.com/*"],
       "js": [
-        "js/content.js",
-        "js/common.js"
+        "js/sites/bjs.js",
+        "js/common.js",
+        "js/content.js"
       ]
     }
   ],

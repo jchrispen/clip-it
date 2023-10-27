@@ -32,7 +32,7 @@ browser.runtime.onMessage.addListener((request) => {
 });
 
 /** ---------------------------------------------------------------------------
- * Common functions
+ * Common content functions
  **/
 function getItem(itemKey) {
     console.log("Checking for localStorage support");
