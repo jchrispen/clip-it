@@ -16,7 +16,7 @@ async function bjs_coupon(tab) {
         const membershipNumber = await bjs_getMembershipNumber(tab)
         const clubDetails = await bjs_getClubDetails(tab);
         const zipcode = await bjs_parseZipcode(clubDetails);
-        return bjs_clipOffers(tab, membershipNumber, zipcode);
+        return bjs_clipCoupons(tab, membershipNumber, zipcode);
     } catch (error) {
         return Promise.reject(error);
     }
@@ -61,7 +61,7 @@ async function bjs_parseZipcode(jsonString) {
     return Promise.resolve(postalCode);
 }
 
-async function bjs_clipOffers(tab, membershipNumber, zipcode) {
+async function bjs_clipCoupons(tab, membershipNumber, zipcode) {
     console.log("Send clip request");
     return browser.tabs.sendMessage(tab.id,
         { type: Type.bjs_clipOffers, membershipNumber: membershipNumber, zipcode: zipcode });
@@ -70,3 +70,61 @@ async function bjs_clipOffers(tab, membershipNumber, zipcode) {
 /** ---------------------------------------------------------------------------
  * BJs.com content functions
  **/
+async function bjs_clipOffers(membershipNumber, zipcode) {
+    console.log("Offers: Fetching available offers from API");
+    return fetch('https://api.bjs.com/digital/live/api/v1.0/member/available/offers', {
+        method: 'post',
+        credentials: 'include',
+        body: JSON.stringify({
+            membershipNumber,
+            zipcode,
+            'category': '',
+            'isPrev': false,
+            'isNext': true,
+            'pagesize': MAX_COUPON_REQUEST,
+            'searchString': '',
+            'indexForPagination': 0,
+            'brand': ''
+        })
+    })
+        .then(response => {
+            // check for a failed response
+            if (response.status < 200 && response.status > 299) {
+                const message = "Offers fetch unsuccessful [" + response.status + "] " + response.statusText;
+                onError(message);
+                return Promise.reject(message);
+            }
+
+            const message = "Offers fetch status [" + response.status + "]";
+            console.log(message);
+            return response.json();
+        })
+        .then((availableOffers) => {
+            if (availableOffers[0].totalAvailable === 0) {
+                const message = "No offers available"
+                console.log(message);
+                return Promise.resolve(message);
+            }
+
+            let count = 0;
+            // Intentionally doing sequential requests to avoid hammering the backend
+            availableOffers.forEach(
+                async ({ offerId, storeId }) => {
+                    if (isInvalid(offerId)) {
+                        const message = "OfferId is not valid";
+                        onError(message);
+                        return;
+                    }
+
+                    const url = `https://api.bjs.com/digital/live/api/v1.0/store/${storeId}/coupons/activate?zip=${zipcode}&offerId=${offerId}`;
+                    console.log("Url: " + url);
+                    // let r = await fetch(url, {credentials: 'include'});
+                    // if (r.status >= 200 && r.status <= 299) count++;
+                }
+            );
+
+            const message = count + " coupons clipped";
+            console.log(message);
+            return Promise.resolve(message);
+        });
+}
