@@ -15,20 +15,22 @@
  **/
 browser.action.onClicked.addListener(async (tab) => {
     console.log("Hi, Mom!");
-    var current_url = new URL(tab.url).origin;
+    const current_url = new URL(tab.url).origin;
 
+    let coupons;
     switch (current_url) {
         case BJS_URL:
-            bjs_coupon(tab)
-                .then(msg => { success(msg); })
-                .catch(error => { fail(error.message); });
+            coupons = bjs_coupon(tab);
             break;
         // case GIANT_URL:
-        //     giant_coupon();
+        //     coupons = giant_coupon(tab);
         //     break;
         default:
-            showAlert("Error", "Site not supported");
+            coupons = Promise.reject(Error("Site not supported"));
     }
+    coupons
+        .then(msg => { success(msg); })
+        .catch(error => { fail(error.message); });
 })
 
 /** ---------------------------------------------------------------------------
