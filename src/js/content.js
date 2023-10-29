@@ -14,7 +14,10 @@ browser.runtime.onMessage.addListener((request) => {
     switch (request.type) {
         case Type.getItem:
             console.log("Getting [" + request.itemKey + "]");
-            return bjs_getItem(request.itemKey);
+            return bjs_getItem(request.itemKey)
+                .catch(error => {
+                    return reject(error);
+                });
         case Type.bjs_clipOffers:
             console.log("clip it!");
             return bjs_clipOffers(request.membershipNumber, request.zipcode);
@@ -29,12 +32,12 @@ browser.runtime.onMessage.addListener((request) => {
 function getItem(itemKey) {
     console.log("Checking for localStorage support");
     if (!window.localStorage) {
-        throw Error("localStorage not supported");
+        throw new Error("localStorage not supported");
     }
     console.log("localStorage is supported. Getting [" + itemKey + "]");
     const item= window.localStorage.getItem(itemKey);
     if (isInvalid(item)) {
-        throw Error("Item [" + itemKey + "] not found");
+        throw new Error("Item [" + itemKey + "] not found");
     } else {
         return item;
     }

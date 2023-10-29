@@ -84,11 +84,17 @@ function wrongScriptContext() {
 }
 
 async function resolve(reason) {
+    if(isInvalid(reason)) {
+        return Promise.resolve("reason was invalid");
+    }
     console.log(reason);
     return Promise.resolve(reason);
 }
 
 async function reject(reason) {
+    if(isInvalid(reason)) {
+        return Promise.reject("reason was invalid");
+    }
     onError(reason);
-    return Promise.reject(Error(reason));
+    return Promise.reject(reason);
 }

@@ -17,20 +17,20 @@ browser.action.onClicked.addListener(async (tab) => {
 
     const current_url = new URL(tab.url).origin;
 
-    let coupons;
     switch (current_url) {
         case BJS_URL:
-            coupons = await bjs_coupon(tab);
+            await bjs_coupon(tab)
+                .then(msg => { success(msg); })
+                .catch(error => { fail(error); });
             break;
         // case GIANT_URL:
         //     coupons = giant_coupon(tab);
         //     break;
         default:
-            coupons = reject("Site not supported");
+            reject("Site not supported")
+                .then(msg => { success(msg); })
+                .catch(error => { fail(error); });
     }
-    coupons
-        .then(msg => { success(msg); })
-        .catch(error => { fail(error.message); });
 })
 
 /** ---------------------------------------------------------------------------

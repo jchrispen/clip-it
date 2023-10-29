@@ -29,7 +29,7 @@ async function bjs_getMembershipNumber(tab) {
     const membershipNumber = await grabItem(tab, "x_MembershipNumber");
     // if membership is null or undefined exit.
     if (isInvalid(membershipNumber)) {
-        throw Error("Need to be logged in to clip coupons");
+        throw new Error("Need to be logged in to clip coupons");
     }
 
     console.log("MembershipNumber: " + membershipNumber);
@@ -42,7 +42,7 @@ async function bjs_getClubDetails(tab) {
 
     // if clubDetails is null or undefined exit.
     if (isInvalid(clubDetails)) {
-        throw Error("Need location selected to be able to pull offers");
+        throw new Error("Need location selected to be able to pull offers");
     }
 
     return resolve(clubDetails);
@@ -66,23 +66,21 @@ async function bjs_clipCoupons(tab, membershipNumber, zipcode) {
  **/
 
 async function bjs_getItem(itemKey) {
-    try {
-        const itemValue = getItem(itemKey);
-        console.log(itemKey + ": " + itemValue);
-        return resolve({ item: itemValue });
-    } catch (error) {
-        return reject(error.message);
-    }
+    const itemValue = getItem(itemKey);
+    return resolve({ item: itemValue });
 }
 
 async function bjs_clipOffers(membershipNumber, zipcode) {
-    console.log("Fetching available offers from API");
+    console.log("Preparing to clip offers");
     return bjs_fetch(membershipNumber, zipcode)
         .then(response => {
             return bjs_processFetch(response);
         })
         .then((availableOffers) => {
             return bjs_processOffers(availableOffers, zipcode);
+        })
+        .catch(error => {
+            return reject(error);
         });
 }
 
@@ -106,19 +104,19 @@ async function bjs_fetch(membershipNumber, zipcode) {
 }
 
 async function bjs_processFetch(response) {
-        // Check for a failed response
-        if (response.status < 200 || response.status >= 300) {
-            throw new Error("Offers fetch unsuccessful [" + response.status + "] " + response.statusText);
-        }
-        console.log("Offers fetch status [" + response.status + "]");
+    // Check for a failed response
+    if (response.status < 200 || response.status >= 300) {
+        throw new Error("Offers fetch unsuccessful [" + response.status + "] " + response.statusText);
+    }
+    console.log("Offers fetch status [" + response.status + "]");
 
-        const data = await response.json();
+    const data = await response.json();
     return data[0].availableOffers; // Return an object with the parsed JSON data
 }
 
 async function bjs_processOffers(availableOffers, zipcode) {
     return new Promise(async (resolve, reject) => {
-        if (availableOffers.totalAvailable === 0) {
+        if (availableOffers.length === 0) {
             return reject("No offers available");
         }
 
