@@ -45,13 +45,56 @@ function showAlert(title, message) {
 }
 
 function success(message) {
+    console.log("Success: " + message);
     showAlert("Success", message);
 }
 
 function fail(message) {
+    onError(message);
     showAlert("Fail", message);
+}
+
+function logJson(jsonObject) {
+    console.log(JSON.stringify(jsonObject, null, 2));
 }
 
 function isInvalid(variable) {
     return variable === null || variable === undefined;
+}
+
+/**
+ * test if your running as a background script
+ * @returns {boolean}
+ */
+function isBackgroundScript() {
+    return !isContentScript();
+}
+
+/**
+ * test if your running as a content script
+ * @returns {boolean}
+ */
+function isContentScript() {
+    return extension.getBackgroundPage() === null;
+}
+
+function wrongScriptContext() {
+    const message = "You cannot call this function under this context.";
+    return Error(message);
+}
+
+async function resolve(reason) {
+    if(isInvalid(reason)) {
+        return Promise.resolve("reason was invalid");
+    }
+    console.log(reason);
+    return Promise.resolve(reason);
+}
+
+async function reject(reason) {
+    if(isInvalid(reason)) {
+        return Promise.reject("reason was invalid");
+    }
+    onError(reason);
+    return Promise.reject(reason);
 }
