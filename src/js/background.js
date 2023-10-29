@@ -1,40 +1,55 @@
-/*
- * Clip all the coupons on your BJs account.
+/**
+ * Clip all available coupons
+ * - Login to website
+ * - Click on the Clip-it icon
+ * - Clip coupons
+ *
+ * background script interacts with the user and can send notifications
  */
 
-browser.browserAction.onClicked.addListener((tab) => {
-        var taburl = "https://www.bjs.com";
-        var currenturl = tab.url;
+"use strict";
 
-        var match = currenturl.startsWith(taburl);
-        if (match) {
-            // clip coupons
-            console.log("FINDME: clip it!");
-            clipit();
-            tab.url = taburl + "/myCoupons";
+/** ---------------------------------------------------------------------------
+ * onClicked listener
+ **/
+browser.action.onClicked.addListener(async (tab) => {
+    console.log("Hi, Mom!");
 
-        } else {
-            console.log("FINDME: new tab!");
-            // open new tab
-            browser.tabs.create({
-                url: taburl
-            });
-        }
+    const current_url = new URL(tab.url).origin;
+
+    switch (current_url) {
+        case BJS_URL:
+            await bjs_coupon(tab)
+                .then(msg => { success(msg); })
+                .catch(error => { fail(error); });
+            break;
+        // case GIANT_URL:
+        //     coupons = giant_coupon(tab);
+        //     break;
+        default:
+            reject("Site not supported")
+                .then(msg => { success(msg); })
+                .catch(error => { fail(error); });
     }
-)
+})
 
-function clipit() {
-    const executing = browser.tabs.executeScript({
-        file: "js/BJs_clipAllOffers.js",
-        allFrames: false
-    });
-    executing.then(onExecuted, onError);
-}
+/** ---------------------------------------------------------------------------
+ * Common background functions
+ **/
+async function grabItem(tab, key) {
+    if (isInvalid(tab) || isInvalid(key)) {
+        return reject("grabItem: tab or key not valid");
+    }
 
-function onExecuted(result) {
-    console.log(`FINDME Success: We executed`);
-}
-
-function onError(error) {
-    console.log(`FINDME Error: ${error}`);
+    const emptyString = "";
+    return await browser.tabs.sendMessage(tab.id, { type: Type.getItem, itemKey: key })
+        .then((response) => {
+            let valueString = emptyString;
+            if (response.item) {
+                valueString = response.item;
+            } else {
+                return reject("did not find [" + key + "]: " + response.reason);
+            }
+            return (valueString);
+        });
 }
