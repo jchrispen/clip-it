@@ -50,10 +50,45 @@ function success(message) {
 }
 
 function fail(message) {
-    onError("Fail: " + message);
+    onError(message);
     showAlert("Fail", message);
+}
+
+function logJson(jsonObject) {
+    console.log(JSON.stringify(jsonObject, null, 2));
 }
 
 function isInvalid(variable) {
     return variable === null || variable === undefined;
+}
+
+/**
+ * test if your running as a background script
+ * @returns {boolean}
+ */
+function isBackgroundScript() {
+    return !isContentScript();
+}
+
+/**
+ * test if your running as a content script
+ * @returns {boolean}
+ */
+function isContentScript() {
+    return extension.getBackgroundPage() === null;
+}
+
+function wrongScriptContext() {
+    const message = "You cannot call this function under this context.";
+    return Error(message);
+}
+
+async function resolve(reason) {
+    console.log(reason);
+    return Promise.resolve(reason);
+}
+
+async function reject(reason) {
+    onError(reason);
+    return Promise.reject(Error(reason));
 }

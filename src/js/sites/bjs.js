@@ -1,6 +1,8 @@
 /**
- * BJ's functions and information that both
- * background and content scripts use.
+ * - Clip all available BJ's coupons
+ * - Based on the work of raxityo/clipAllOffers.js on github
+ * - BJ's functions and information that both
+ *   background and content scripts use.
  */
 
 /**
@@ -13,12 +15,12 @@ const BJS_URL = "https://www.bjs.com";
  **/
 async function bjs_coupon(tab) {
     try {
-        const membershipNumber = await bjs_getMembershipNumber(tab)
+        const membershipNumber = await bjs_getMembershipNumber(tab);
         const clubDetails = await bjs_getClubDetails(tab);
         const zipcode = await bjs_parseZipcode(clubDetails);
-        return bjs_clipCoupons(tab, membershipNumber, zipcode);
+        return await bjs_clipCoupons(tab, membershipNumber, zipcode);
     } catch (error) {
-        return Promise.reject(error);
+        return reject(error.message);
     }
 }
 
@@ -27,8 +29,7 @@ async function bjs_getMembershipNumber(tab) {
     const membershipNumber = await grabItem(tab, "x_MembershipNumber");
     // if membership is null or undefined exit.
     if (isInvalid(membershipNumber)) {
-        const message = "Need to be logged in to clip coupons";
-        throw Error(message);
+        throw Error("Need to be logged in to clip coupons");
     }
 
     console.log("MembershipNumber: " + membershipNumber);
@@ -41,24 +42,17 @@ async function bjs_getClubDetails(tab) {
 
     // if clubDetails is null or undefined exit.
     if (isInvalid(clubDetails)) {
-        const message = "Need location selected to be able to pull offers";
-        throw Error(message);
+        throw Error("Need location selected to be able to pull offers");
     }
 
-    return Promise.resolve(clubDetails);
+    return resolve(clubDetails);
 }
 
 async function bjs_parseZipcode(jsonString) {
     console.log("Getting zipcode from json");
-    let postalCode = null;
-    try {
-        postalCode = JSON.parse(jsonString)["postalCode"];
-    } catch (error) {
-        const message = "Issue parsing json for zipcode";
-        throw Error(message);
-    }
+    let postalCode = JSON.parse(jsonString)["postalCode"];
     console.log("Zipcode: " + postalCode);
-    return Promise.resolve(postalCode);
+    return resolve(postalCode);
 }
 
 async function bjs_clipCoupons(tab, membershipNumber, zipcode) {
@@ -75,16 +69,26 @@ async function bjs_getItem(itemKey) {
     try {
         const itemValue = getItem(itemKey);
         console.log(itemKey + ": " + itemValue);
-        return Promise.resolve({ item: itemValue });
+        return resolve({ item: itemValue });
     } catch (error) {
-        onError(error);
-        return Promise.reject(error);
+        return reject(error.message);
     }
 }
 
 async function bjs_clipOffers(membershipNumber, zipcode) {
     console.log("Fetching available offers from API");
-    return fetch('https://api.bjs.com/digital/live/api/v1.0/member/available/offers', {
+    return bjs_fetch(membershipNumber, zipcode)
+        .then(response => {
+            return bjs_processFetch(response);
+        })
+        .then((availableOffers) => {
+            return bjs_processOffers(availableOffers, zipcode);
+        });
+}
+
+async function bjs_fetch(membershipNumber, zipcode) {
+    console.log("Fetching available offers from API");
+    return await fetch('https://api.bjs.com/digital/live/api/v1.0/member/available/offers', {
         method: 'post',
         credentials: 'include',
         body: JSON.stringify({
@@ -99,44 +103,49 @@ async function bjs_clipOffers(membershipNumber, zipcode) {
             'brand': ''
         })
     })
-        .then(response => {
-            // check for a failed response
-            if (response.status < 200 && response.status > 299) {
-                const message = "Offers fetch unsuccessful [" + response.status + "] " + response.statusText;
-                onError(message);
-                return Promise.reject(message);
-            }
+}
 
-            const message = "Offers fetch status [" + response.status + "]";
-            console.log(message);
-            return response.json();
-        })
-        .then((availableOffers) => {
-            if (availableOffers[0].totalAvailable === 0) {
-                const message = "No offers available"
-                console.log(message);
-                return Promise.resolve(message);
-            }
+async function bjs_processFetch(response) {
+        // Check for a failed response
+        if (response.status < 200 || response.status >= 300) {
+            throw new Error("Offers fetch unsuccessful [" + response.status + "] " + response.statusText);
+        }
+        console.log("Offers fetch status [" + response.status + "]");
 
-            let count = 0;
-            // Intentionally doing sequential requests to avoid hammering the backend
-            availableOffers.forEach(
-                async ({ offerId, storeId }) => {
-                    if (isInvalid(offerId)) {
-                        const message = "OfferId is not valid";
-                        onError(message);
-                        return;
-                    }
+        const data = await response.json();
+    return data[0].availableOffers; // Return an object with the parsed JSON data
+}
 
-                    const url = `https://api.bjs.com/digital/live/api/v1.0/store/${storeId}/coupons/activate?zip=${zipcode}&offerId=${offerId}`;
-                    console.log("Url: " + url);
-                    // let r = await fetch(url, {credentials: 'include'});
-                    // if (r.status >= 200 && r.status <= 299) count++;
+async function bjs_processOffers(availableOffers, zipcode) {
+    return new Promise(async (resolve, reject) => {
+        if (availableOffers.totalAvailable === 0) {
+            return reject("No offers available");
+        }
+
+        let count = 0;
+        if (availableOffers && Array.isArray(availableOffers)) {
+            for (const offer of availableOffers) {
+                const offerId = offer.offerId;
+                const storeId = offer.storeId;
+                if (await bjs_fetchCoupons(offerId, storeId, zipcode)) {
+                    count++
                 }
-            );
+            }
+        } else {
+            return reject("Available offers is not iterable or is not an array.");
+        }
+        return resolve(count + " coupons clipped");
+    });
+}
 
-            const message = count + " coupons clipped";
-            console.log(message);
-            return Promise.resolve(message);
-        });
+async function bjs_fetchCoupons(offerId, storeId, zipcode) {
+    if (isInvalid(offerId)) {
+        onError("OfferId is not valid");
+        return false;
+    }
+
+    const url = `https://api.bjs.com/digital/live/api/v1.0/store/${storeId}/coupons/activate?zip=${zipcode}&offerId=${offerId}`;
+    console.log("Url: " + url);
+    const response = await fetch(url, {credentials: 'include'});
+    return (response.status >= 200 && response.status <= 299);
 }

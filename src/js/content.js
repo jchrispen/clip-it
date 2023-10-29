@@ -1,10 +1,5 @@
 /**
- * Clip all available BJ's coupons
- * - Login to BJ's website
- * - Click on the Clip-it icon
- * - Clip coupons
- * - Based on the work of raxityo/clipAllOffers.js on github
- *
+ * Clip all available coupons
  * Content script can access tab/website localStorage and can send webrequests
  */
 
@@ -14,6 +9,8 @@
  * onMessage listener
  **/
 browser.runtime.onMessage.addListener((request) => {
+    console.log("Hi, Mom");
+
     switch (request.type) {
         case Type.getItem:
             console.log("Getting [" + request.itemKey + "]");
@@ -22,7 +19,7 @@ browser.runtime.onMessage.addListener((request) => {
             console.log("clip it!");
             return bjs_clipOffers(request.membershipNumber, request.zipcode);
         default:
-            return Promise.reject(Error("Request type [" + request.type + "] not supported"));
+            return reject("Request type [" + request.type + "] not supported");
     }
 });
 
