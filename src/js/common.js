@@ -18,8 +18,8 @@ class Type {
     static future_site = 2;
 }
 
-function onError(error) {
-    console.error(`Error: ${error}`);
+function onError(reason) {
+    console.error(`Error: ${reason}`);
 }
 
 /**

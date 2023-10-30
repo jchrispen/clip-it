@@ -15,7 +15,16 @@ const BJS_URL = "https://www.bjs.com";
  **/
 async function bjs_background(tab) {
     try {
-        const membershipNumber = await bjs_getMembershipNumber(tab);
+        let membershipNumber;
+        try {
+            membershipNumber = await bjs_getMembershipNumber(tab)
+                .then(member_number => {
+                    return member_number;
+                });
+        } catch (error) {
+            onError(error);
+            return rejectWith("Need to login");
+        }
         const clubDetails = await bjs_getClubDetails(tab);
         const zipcode = await bjs_parseZipcode(clubDetails);
         return await bjs_clipCoupons(tab, membershipNumber, zipcode);
@@ -29,7 +38,7 @@ async function bjs_getMembershipNumber(tab) {
     const membershipNumber = await grabItem(tab, "x_MembershipNumber");
     // if membership is null or undefined exit.
     if (isInvalid(membershipNumber)) {
-        throw new Error("Need to be logged in to clip coupons");
+        throw new Error("Need to login");
     }
 
     console.log("MembershipNumber: " + membershipNumber);
