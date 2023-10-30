@@ -19,7 +19,7 @@ browser.action.onClicked.addListener(async (tab) => {
 
     switch (current_url) {
         case BJS_URL:
-            await bjs_coupon(tab)
+            await bjs_background(tab)
                 .then(msg => { success(msg); })
                 .catch(error => { fail(error); });
             break;
@@ -27,9 +27,7 @@ browser.action.onClicked.addListener(async (tab) => {
         //     coupons = giant_coupon(tab);
         //     break;
         default:
-            reject("Site not supported")
-                .then(msg => { success(msg); })
-                .catch(error => { fail(error); });
+            fail("Site not supported");
     }
 })
 
@@ -38,7 +36,7 @@ browser.action.onClicked.addListener(async (tab) => {
  **/
 async function grabItem(tab, key) {
     if (isInvalid(tab) || isInvalid(key)) {
-        return reject("grabItem: tab or key not valid");
+        return rejectWith("grabItem: tab or key not valid");
     }
 
     const emptyString = "";
@@ -48,7 +46,7 @@ async function grabItem(tab, key) {
             if (response.item) {
                 valueString = response.item;
             } else {
-                return reject("did not find [" + key + "]: " + response.reason);
+                return rejectWith("did not find [" + key + "]: " + response.reason);
             }
             return (valueString);
         });

@@ -16,13 +16,13 @@ browser.runtime.onMessage.addListener((request) => {
             console.log("Getting [" + request.itemKey + "]");
             return bjs_getItem(request.itemKey)
                 .catch(error => {
-                    return reject(error);
+                    return rejectWith(error);
                 });
         case Type.bjs_clipOffers:
             console.log("clip it!");
-            return bjs_clipOffers(request.membershipNumber, request.zipcode);
+            return bjs_content(request.membershipNumber, request.zipcode);
         default:
-            return reject("Request type [" + request.type + "] not supported");
+            return rejectWith("Request type [" + request.type + "] not supported");
     }
 });
 

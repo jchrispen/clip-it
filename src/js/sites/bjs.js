@@ -13,14 +13,14 @@ const BJS_URL = "https://www.bjs.com";
 /** ---------------------------------------------------------------------------
  * BJs.com background functions
  **/
-async function bjs_coupon(tab) {
+async function bjs_background(tab) {
     try {
         const membershipNumber = await bjs_getMembershipNumber(tab);
         const clubDetails = await bjs_getClubDetails(tab);
         const zipcode = await bjs_parseZipcode(clubDetails);
         return await bjs_clipCoupons(tab, membershipNumber, zipcode);
     } catch (error) {
-        return reject(error.message);
+        return rejectWith(error.message);
     }
 }
 
@@ -33,7 +33,7 @@ async function bjs_getMembershipNumber(tab) {
     }
 
     console.log("MembershipNumber: " + membershipNumber);
-    return Promise.resolve(membershipNumber);
+    return resolveWith(membershipNumber);
 }
 
 async function bjs_getClubDetails(tab) {
@@ -45,14 +45,14 @@ async function bjs_getClubDetails(tab) {
         throw new Error("Need location selected to be able to pull offers");
     }
 
-    return resolve(clubDetails);
+    return resolveWith(clubDetails);
 }
 
 async function bjs_parseZipcode(jsonString) {
     console.log("Getting zipcode from json");
     let postalCode = JSON.parse(jsonString)["postalCode"];
     console.log("Zipcode: " + postalCode);
-    return resolve(postalCode);
+    return resolveWith(postalCode);
 }
 
 async function bjs_clipCoupons(tab, membershipNumber, zipcode) {
@@ -67,10 +67,10 @@ async function bjs_clipCoupons(tab, membershipNumber, zipcode) {
 
 async function bjs_getItem(itemKey) {
     const itemValue = getItem(itemKey);
-    return resolve({ item: itemValue });
+    return resolveWith({ item: itemValue });
 }
 
-async function bjs_clipOffers(membershipNumber, zipcode) {
+async function bjs_content(membershipNumber, zipcode) {
     console.log("Preparing to clip offers");
     return bjs_fetch(membershipNumber, zipcode)
         .then(response => {
@@ -78,9 +78,6 @@ async function bjs_clipOffers(membershipNumber, zipcode) {
         })
         .then((availableOffers) => {
             return bjs_processOffers(availableOffers, zipcode);
-        })
-        .catch(error => {
-            return reject(error);
         });
 }
 
@@ -115,25 +112,23 @@ async function bjs_processFetch(response) {
 }
 
 async function bjs_processOffers(availableOffers, zipcode) {
-    return new Promise(async (resolve, reject) => {
-        if (availableOffers.length === 0) {
-            return reject("No offers available");
-        }
+    if (availableOffers.length === 0) {
+        return resolveWith("No offers available");
+    }
 
-        let count = 0;
-        if (availableOffers && Array.isArray(availableOffers)) {
-            for (const offer of availableOffers) {
-                const offerId = offer.offerId;
-                const storeId = offer.storeId;
-                if (await bjs_fetchCoupons(offerId, storeId, zipcode)) {
-                    count++
-                }
+    let count = 0;
+    if (availableOffers && Array.isArray(availableOffers)) {
+        for (const offer of availableOffers) {
+            const offerId = offer.offerId;
+            const storeId = offer.storeId;
+            if (await bjs_fetchCoupons(offerId, storeId, zipcode)) {
+                count++
             }
-        } else {
-            return reject("Available offers is not iterable or is not an array.");
         }
-        return resolve(count + " coupons clipped");
-    });
+    } else {
+        return rejectWith("Available offers is not iterable or is not an array.");
+    }
+    return resolveWith(count + " coupons clipped");
 }
 
 async function bjs_fetchCoupons(offerId, storeId, zipcode) {

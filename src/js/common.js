@@ -83,7 +83,7 @@ function wrongScriptContext() {
     return Error(message);
 }
 
-async function resolve(reason) {
+async function resolveWith(reason) {
     if(isInvalid(reason)) {
         return Promise.resolve("reason was invalid");
     }
@@ -91,7 +91,7 @@ async function resolve(reason) {
     return Promise.resolve(reason);
 }
 
-async function reject(reason) {
+async function rejectWith(reason) {
     if(isInvalid(reason)) {
         return Promise.reject("reason was invalid");
     }
