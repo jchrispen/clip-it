@@ -13,14 +13,23 @@ browser.runtime.onMessage.addListener((request) => {
 
     switch (request.type) {
         case Type.getItem:
-            console.log("Getting [" + request.itemKey + "]");
-            return bjs_getItem(request.itemKey)
+            console.log("Getting [" + request.itemKey + "] from localStorage");
+            return getItem(request.itemKey)
+                .catch(error => {
+                    return rejectWith(error);
+                });
+        case Type.getAppConfig:
+            console.log("Getting [" + request.itemKey + "] from appConfig");
+            return getAppConfig(request.itemKey)
                 .catch(error => {
                     return rejectWith(error);
                 });
         case Type.bjs_clipOffers:
-            console.log("clip it!");
+            console.log("BJ's clip it!");
             return bjs_content(request.membershipNumber, request.zipcode);
+        case Type.giant_clipOffers:
+            console.log("Giant clip it!");
+            return giant_content(request.userId, request.locationId);
         default:
             return rejectWith("Request type [" + request.type + "] not supported");
     }
@@ -39,6 +48,18 @@ function getItem(itemKey) {
     if (isInvalid(item)) {
         throw new Error("Item [" + itemKey + "] not found");
     } else {
-        return item;
+        return resolveWith({ item: item });
+    }
+}
+
+function getAppConfig(itemKey) {
+    // Get the appConfig.user JSON string
+    const appConfigUserObj = window.wrappedJSObject.appConfig.user;
+    // Check if the property with itemKey exists in the object
+    if (appConfigUserObj.hasOwnProperty(itemKey)) {
+        // Get the value associated with the itemKey
+        return resolveWith({ item: appConfigUserObj[itemKey] });
+    } else {
+        throw new Error(itemKey + " was not found");
     }
 }

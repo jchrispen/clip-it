@@ -14,8 +14,9 @@ const MAX_COUPON_REQUEST = 500;
  */
 class Type {
     static getItem = 0;
-    static bjs_clipOffers = 1;
-    static future_site = 2;
+    static getAppConfig = 1;
+    static bjs_clipOffers = 2;
+    static giant_clipOffers = 3;
 }
 
 function onError(reason) {

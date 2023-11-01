@@ -73,12 +73,6 @@ async function bjs_clipCoupons(tab, membershipNumber, zipcode) {
 /** ---------------------------------------------------------------------------
  * BJs.com content functions
  **/
-
-async function bjs_getItem(itemKey) {
-    const itemValue = getItem(itemKey);
-    return resolveWith({ item: itemValue });
-}
-
 async function bjs_content(membershipNumber, zipcode) {
     console.log("Preparing to clip offers");
     return bjs_fetch(membershipNumber, zipcode)

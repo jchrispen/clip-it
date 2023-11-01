@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Clip-it",
-  "version": "1.1",
+  "version": "1.2",
   "description": "An extension to clip all the coupons with one click",
   "homepage_url": "https://github.com/jchrispen/bjs-clip-it",
 
@@ -11,11 +11,7 @@
     }
   },
 
-  "host_permissions": [
-    "https://api.bjs.com/*",
-    "https://www.bjs.com/*",
-    "<all_urls>"
-  ],
+  "host_permissions": [],
 
   "permissions": [
     "webRequest",
@@ -27,6 +23,7 @@
 
   "background": {
     "scripts": [
+      "js/sites/giantfood.js",
       "js/sites/bjs.js",
       "js/common.js",
       "js/background.js"
@@ -35,8 +32,12 @@
 
   "content_scripts": [
     {
-      "matches": ["*://*.bjs.com/*"],
+      "matches": [
+        "https://giantfood.com/*",
+        "https://www.bjs.com/*"
+      ],
       "js": [
+        "js/sites/giantfood.js",
         "js/sites/bjs.js",
         "js/common.js",
         "js/content.js"
