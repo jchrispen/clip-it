@@ -11,7 +11,12 @@
     }
   },
 
-  "host_permissions": [],
+  "host_permissions": [
+    "https://giantfood.com/*",
+    "https://api.bjs.com/*",
+    "https://www.bjs.com/*",
+    "<all_urls>"
+  ],
 
   "permissions": [
     "webRequest",
@@ -33,8 +38,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://giantfood.com/*",
-        "https://www.bjs.com/*"
+        "*://giantfood.com/*",
+        "*://*.bjs.com/*"
       ],
       "js": [
         "js/sites/giantfood.js",

@@ -1,26 +1,20 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Clip-it",
   "version": "1.1",
   "description": "An extension to clip all the coupons with one click",
   "homepage_url": "https://github.com/jchrispen/bjs-clip-it",
-
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "{e4f681df-7721-4c60-b31a-73e6b489c791}"
-    }
-  },
-
-  "host_permissions": [],
-
   "permissions": [
     "webRequest",
     "cookies",
     "activeTab",
     "storage",
-    "notifications"
+    "notifications",
+    "https://giantfood.com/*",
+    "https://api.bjs.com/*",
+    "https://www.bjs.com/*",
+    "<all_urls>"
   ],
-
   "background": {
     "scripts": [
       "js/sites/giantfood.js",
@@ -29,12 +23,11 @@
       "js/background.js"
     ]
   },
-
   "content_scripts": [
     {
       "matches": [
-        "https://giantfood.com/*",
-        "https://www.bjs.com/*"
+        "*://giantfood.com/*",
+        "*://*.bjs.com/*"
       ],
       "js": [
         "js/sites/giantfood.js",
@@ -44,14 +37,12 @@
       ]
     }
   ],
-
-  "action": {
+  "browser_action": {
     "default_title": "Clip it!",
-    "default_icon": "icons/clip-it_dark.png",
-    "theme_icons": [{
-      "dark": "icons/clip-it_light.png",
-      "light": "icons/clip-it_dark.png",
-      "size": 32
-    }]
+    "default_icon": {
+      "16": "icons/clip-it_dark.png",
+      "48": "icons/clip-it_dark.png",
+      "128": "icons/clip-it_dark.png"
+    }
   }
 }
