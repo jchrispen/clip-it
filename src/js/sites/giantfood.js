@@ -116,7 +116,7 @@ async function giant_fetch(userId, locationId) {
         });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            throw new Error(`Network response was not ok with status [${response.status}`);
         }
 
         const data = await response.json();
