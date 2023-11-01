@@ -8,21 +8,20 @@
  * static constant values for all scripts
  */
 const GIANT_URL = "https://giantfood.com";
+const DEFAULT_USER = 2;
 
 /** ---------------------------------------------------------------------------
  * GiantFood.com background functions
  **/
 async function giant_background(tab) {
-    let userUuid;
     let userId;
     let locationId;
     try {
-        userUuid = await giant_getUserUuid(tab)
-            .then(item => {
-                return item;
-            });
         userId = await giant_getUserId(tab)
             .then(item => {
+                if (item === DEFAULT_USER) {
+                    throw new Error("Need to login");
+                }
                 return item;
             });
         locationId = await giant_getLocationId(tab)
